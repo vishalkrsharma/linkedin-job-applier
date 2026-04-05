@@ -15,6 +15,7 @@ class Tracker:
     def __init__(self, data_dir: str = "data"):
         self.data_dir = data_dir
         self.filepath = os.path.join(data_dir, "applied_jobs.json")
+        self.failed_filepath = os.path.join(data_dir, "failed_jobs.json")
         ensure_dir(data_dir)
         self._load()
 
@@ -25,11 +26,19 @@ class Tracker:
                 self.data = json.load(f)
         else:
             self.data = {"applied": [], "skipped": [], "failed": []}
+            
+        if os.path.exists(self.failed_filepath):
+            with open(self.failed_filepath, "r") as f:
+                self.failed_data = json.load(f)
+        else:
+            self.failed_data = {"failed": []}
 
     def _save(self):
         """Persist tracking data to disk."""
         with open(self.filepath, "w") as f:
             json.dump(self.data, f, indent=2, default=str)
+        with open(self.failed_filepath, "w") as f:
+            json.dump(self.failed_data, f, indent=2, default=str)
 
     def is_already_applied(self, job_id: str) -> bool:
         """Check if we've already applied to this job."""
@@ -62,13 +71,15 @@ class Tracker:
 
     def record_failed(self, job_id: str, title: str, company: str, error: str):
         """Record a failed application attempt."""
-        self.data["failed"].append({
+        entry = {
             "job_id": job_id,
             "title": title,
             "company": company,
             "error": error,
             "failed_at": datetime.now().isoformat(),
-        })
+        }
+        self.data["failed"].append(entry)
+        self.failed_data["failed"].append(entry)
         self._save()
 
     def get_summary(self) -> dict:
@@ -77,13 +88,14 @@ class Tracker:
         
         today_applied = [j for j in self.data["applied"] if j.get("applied_at", "").startswith(today_str)]
         today_skipped = [j for j in self.data["skipped"] if j.get("skipped_at", "").startswith(today_str)]
-        today_failed  = [j for j in self.data["failed"] if j.get("failed_at", "").startswith(today_str)]
+        today_failed  = [j for j in self.failed_data["failed"] if j.get("failed_at", "").startswith(today_str)]
         
         return {
             "total_applied": len(today_applied),
             "total_skipped": len(today_skipped),
             "total_failed": len(today_failed),
-            "todays_applied_jobs": today_applied
+            "todays_applied_jobs": today_applied,
+            "todays_failed_jobs": today_failed
         }
 
     def print_summary(self):
@@ -124,5 +136,21 @@ class Tracker:
                     
                 recent_table.add_row(job_str, dt_str)
             console.print(recent_table)
+
+        todays_failed = summary["todays_failed_jobs"]
+        if todays_failed:
+            console.print("\n[bold red]Today's Failed Applications:[/bold red]")
+            error_table = Table(show_header=True, header_style="bold red")
+            error_table.add_column("Job (Role - Company)", style="white")
+            error_table.add_column("Error Reason", style="dim")
+            
+            for job in todays_failed:
+                title = job.get("title", "Unknown").strip().split("\n")[0]
+                company = job.get("company", "").strip().split("\n")[0]
+                job_str = f"{title} - {company}" if company else title
+                error_msg = job.get("error", "Unknown error").strip().split("\n")[0][:60]
+                
+                error_table.add_row(job_str, error_msg)
+            console.print(error_table)
 
         console.print("")
