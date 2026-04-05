@@ -1,0 +1,8 @@
+config.yaml
+venv/
+data/
+*.pdf
+__pycache__/
+*.pyc
+.env
+screenshots/

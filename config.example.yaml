@@ -1,0 +1,166 @@
+# ============================================
+# LinkedIn Auto Apply Bot — Configuration
+# ============================================
+# Copy this file to config.yaml and fill in your details.
+# Do NOT commit config.yaml to version control!
+
+# --- LinkedIn Credentials (optional) ---
+# If provided, the bot auto-logs in. If left blank, you'll
+# log in manually in the browser on first run.
+linkedin:
+  email: 'your_email@example.com'
+  password: '' # Fill in your password here
+
+# --- Job Search Settings ---
+search:
+  # Keywords to search for (you can add multiple)
+  keywords:
+    - 'Frontend Developer'
+    - 'Backend Developer'
+    - 'Full Stack Developer'
+    - 'Android Developer'
+
+  # Locations for job search (you can add multiple)
+  locations:
+    - 'Hyderabad, India'
+    - 'Bengaluru, India'
+
+  # Filters (all optional)
+  filters:
+    # Experience level: "internship", "entry_level", "associate", "mid_senior", "director", "executive"
+    experience_level:
+      - 'entry_level'
+      - 'associate'
+
+    # Job type: "full_time", "part_time", "contract", "temporary", "internship"
+    job_type:
+      - 'full_time'
+
+    # Remote preference: "on_site", "remote", "hybrid"
+    remote:
+      - 'remote'
+      - 'hybrid'
+
+    # Date posted: "any_time", "past_month", "past_week", "past_24_hours"
+    date_posted: 'past_week'
+
+    # Only show Easy Apply jobs
+    easy_apply_only: true
+
+    # Sort by: "most_relevant", "most_recent"
+    sort_by: 'most_recent'
+
+# --- Resume ---
+resume_path: './Resume_Your_Name.pdf'
+
+# --- Default Answers for Application Questions ---
+# These are used to auto-fill common Easy Apply form fields.
+# Add more as you encounter new questions.
+answers:
+  # Years of experience
+  years_of_experience: '2'
+
+  # Months of experience (used when forms ask for additional months)
+  months_of_experience: '0'
+
+  # Phone number
+  phone_number: '+91 9876543210'
+
+  # Current city
+  city: 'Hyderabad'
+
+  # Are you legally authorized to work?
+  authorized_to_work: 'Yes'
+
+  # Will you now or in the future require sponsorship?
+  require_sponsorship: 'No'
+
+  # Current CTC / Expected CTC
+  current_ctc: '9'
+  expected_ctc: '16'
+
+  # Notice period (in days)
+  notice_period: '90'
+
+  # Gender (optional, some companies ask)
+  gender: 'Male'
+
+  # Highest degree
+  degree: "Bachelor's"
+
+  # GPA / CGPA
+  gpa: '8.55'
+
+  # LinkedIn profile URL
+  linkedin_url: 'https://www.linkedin.com/in/yourprofile'
+
+  # GitHub profile URL
+  github_url: 'https://github.com/yourusername'
+
+  # Portfolio/Website URL
+  website_url: 'https://leetcode.com/yourusername'
+
+  # Custom question-answer mappings (regex pattern -> answer)
+  # The bot will try to match question text against these patterns
+  custom:
+    - pattern: 'salary|compensation|ctc'
+      answer: 'Negotiable'
+    - pattern: 'visa|sponsorship'
+      answer: 'No'
+    - pattern: 'relocat'
+      answer: 'Yes'
+    - pattern: 'start date|join.*date|available.*from'
+      answer: 'Immediately'
+    - pattern: 'cover letter'
+      answer: 'I am excited about this opportunity and believe my skills align well with the requirements.'
+
+# --- Bot Behavior ---
+bot:
+  # Maximum number of applications per run
+  max_applications: 25
+
+  # Whether to upload the resume (set to false to use LinkedIn's latest saved resume)
+  upload_resume: false
+
+  # Delay between actions (seconds) — randomized between min and max
+  delay_min: 0.5
+  delay_max: 1.5
+
+  # Delay between applications (seconds)
+  apply_delay_min: 1.0
+  apply_delay_max: 3.0
+
+  # Run in headless mode (no visible browser window)
+  headless: false
+
+  # Dry run — fill forms but don't submit
+  dry_run: false
+
+  # Skip jobs you've already applied to
+  skip_already_applied: true
+
+  # Maximum pages of search results to process
+  max_pages: 10
+
+  # Browser viewport size
+  viewport_width: 1280
+  viewport_height: 900
+
+  # Screenshot on error (saved to data/ directory)
+  screenshot_on_error: true
+
+# --- Blacklist ---
+# Skip jobs matching these criteria
+blacklist:
+  # Companies to skip
+  companies:
+    - 'Scam Corp'
+
+  # Title keywords to skip (case-insensitive)
+  title_keywords:
+    - 'senior'
+    - 'lead'
+    - 'manager'
+    - 'director'
+    - 'principal'
+    - 'staff'
