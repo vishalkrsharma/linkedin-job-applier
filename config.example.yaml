@@ -122,10 +122,6 @@ bot:
   # Whether to upload the resume (set to false to use LinkedIn's latest saved resume)
   upload_resume: false
 
-  # Delay between actions (seconds) — randomized between min and max
-  delay_min: 0.5
-  delay_max: 1.5
-
   # Delay between applications (seconds)
   apply_delay_min: 1.0
   apply_delay_max: 3.0
