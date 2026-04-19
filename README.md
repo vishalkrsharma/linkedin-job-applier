@@ -32,6 +32,7 @@ cp config.example.yaml config.yaml
 ```
 
 Edit `config.yaml` with your:
+
 - LinkedIn credentials
 - Job search keywords (can be multiple) and locations (can be multiple)
 - Your resume path and whether to use the upload feature
@@ -65,16 +66,16 @@ python main.py --dry-run
 
 See `config.example.yaml` for all available options. Key settings:
 
-| Setting | Description |
-|---------|-------------|
-| `linkedin.email` | Your LinkedIn email |
-| `linkedin.password` | Your LinkedIn password |
-| `search.keywords` | List of job search keywords (e.g., "Frontend Developer", "Backend Developer") |
-| `search.locations` | List of preferred locations (e.g., "Hyderabad, India", "Worldwide") |
-| `search.filters` | Experience level, job type, remote, etc. |
-| `answers` | Default textual answers for common application questions (including Regex support) |
-| `resume_path` | Path to your resume PDF |
-| `bot.upload_resume` | `false` uses the existing LinkedIn default. `true` attempts to re-upload. |
+| Setting             | Description                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `linkedin.email`    | Your LinkedIn email                                                                |
+| `linkedin.password` | Your LinkedIn password                                                             |
+| `search.keywords`   | List of job search keywords (e.g., "Frontend Developer", "Backend Developer")      |
+| `search.locations`  | List of preferred locations (e.g., "Hyderabad, India", "Worldwide")                |
+| `search.filters`    | Experience level, job type, remote, etc.                                           |
+| `answers`           | Default textual answers for common application questions (including Regex support) |
+| `resume_path`       | Path to your resume PDF                                                            |
+| `bot.upload_resume` | `false` uses the existing LinkedIn default. `true` attempts to re-upload.          |
 
 ## ⚠️ Disclaimer
 
