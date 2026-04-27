@@ -33,10 +33,10 @@ class Applicant:
         # Click the Easy Apply button
         if not self._click_easy_apply():
             return False
-
         human_delay(0.5, 1.0)
-
+        
         # Process each step of the multi-step form
+        
         max_steps = 10  # Safety limit
         for step in range(max_steps):
             log_info(f"  Processing form step {step + 1}...")
@@ -564,15 +564,27 @@ class Applicant:
                 human_delay(0.5, 1.0)
 
                 # Handle "Discard application?" confirmation
-                discard_btn = page.locator(
-                    'button[data-test-dialog-primary-btn], '
-                    'button:has-text("Discard"), '
-                    'button:has-text("Yes, discard")'
-                ).first
+                # discard_btn = page.locator(
+                #     'button[data-test-dialog-primary-btn], '
+                #     'button:has-text("Discard"), '
+                #     'button:has-text("Yes, discard")'
+                # ).first
 
-                if discard_btn.count() > 0 and discard_btn.is_visible():
-                    discard_btn.click()
-                    human_delay(0.5, 1.0)
+                # if discard_btn.count() > 0 and discard_btn.is_visible():
+                #     discard_btn.click()
+                #     human_delay(0.5, 1.0)
+
+                log_success("Clicked Dismiss (cross)")
+
+                # Step 2: Wait for Save button in confirmation modal
+                save_btn = page.locator('[data-control-name="save_application_btn"]').first
+
+                save_btn.wait_for(state="visible", timeout=5000)
+                human_delay(0.5, 1.0)
+                save_btn.click()
+
+                log_success("Application Saved as Draft!")
+                human_delay(2, 3)
 
         except Exception:
             pass

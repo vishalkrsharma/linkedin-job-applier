@@ -7,8 +7,8 @@ import os
 import re
 import time
 
-from playwright.sync_api import sync_playwright, Page, Browser
-
+from playwright.sync_api import sync_playwright, Page
+from playwright.sync_api import Page, TimeoutError as PlaywrightTimeout
 from src.job_search import (
     build_search_url,
     get_job_listings,
@@ -17,6 +17,7 @@ from src.job_search import (
     go_to_next_page,
     JobListing,
 )
+from src.utils import should_apply
 from src.applicant import Applicant
 from src.tracker import Tracker
 from src.utils import (
@@ -250,13 +251,14 @@ class LinkedInBot:
 
                     # Skip checks
                     if self._should_skip(listing):
+                        log_info(f"The title is skipped :{listing.title}")
                         continue
 
                     # Click on the job card to view details
                     if not click_job_card(page, listing):
                         log_warning(f"  Could not click job card, skipping")
                         continue
-
+                    
                     human_delay(0.5, 1.0)
 
                     # Check if already applied on LinkedIn's side
@@ -342,7 +344,7 @@ class LinkedInBot:
                 )
                 return True
 
-        return False
+        return should_apply(title=title_lower)
 
     def _is_already_applied_on_page(self, page: Page) -> bool:
         """Check if LinkedIn shows 'Applied' status on the job details panel."""

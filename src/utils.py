@@ -12,7 +12,33 @@ from rich.console import Console
 
 console = Console()
 
+import re
 
+def should_apply(title: str) -> bool:
+    tokens = [t.lower() for t in split_role(title)]
+    log_info(f" Title tokens : {tokens}")
+    ROLE_KEYWORDS = {"sde", "developer", "engineer"}
+    TECH_KEYWORDS = {"backend", "nodejs", "node", "golang", "go", "python", "fastapi", "javascript", "typescript", "aws"}
+
+    has_role = any(token in ROLE_KEYWORDS for token in tokens)
+    has_tech = any(token in TECH_KEYWORDS for token in tokens)
+
+    log_info(f" has role: {has_role} | has tech: {has_tech}")
+    return not (has_role or has_tech)
+
+def split_role(text: str) -> list[str]:
+    parts = re.split(r'[^a-zA-Z0-9]+', text)
+    log_info(f"parts {parts}")
+
+    seen = set()
+    result = []
+
+    for p in parts:
+        if p and p not in seen:
+            seen.add(p)
+            result.append(p)
+
+    return result
 def human_delay(min_sec: float = 1.0, max_sec: float = 3.0):
     """Sleep for a random duration to mimic human behavior."""
     delay = random.uniform(min_sec, max_sec)
