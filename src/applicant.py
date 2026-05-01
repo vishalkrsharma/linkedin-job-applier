@@ -552,41 +552,54 @@ class Applicant:
         page = self.page
 
         try:
-            # Click dismiss / X button
+            # Step 1: Click the X / Dismiss button to close the modal
             dismiss_btn = page.locator(
                 'button[aria-label="Dismiss"], '
                 'button[data-test-modal-close-btn], '
                 'button.artdeco-modal__dismiss'
             ).first
 
-            if dismiss_btn.count() > 0:
+            if dismiss_btn.count() > 0 and dismiss_btn.is_visible():
                 dismiss_btn.click()
+                log_info("  Clicked modal dismiss (X)")
                 human_delay(0.5, 1.0)
-
-                # Handle "Discard application?" confirmation
-                # discard_btn = page.locator(
-                #     'button[data-test-dialog-primary-btn], '
-                #     'button:has-text("Discard"), '
-                #     'button:has-text("Yes, discard")'
-                # ).first
-
-                # if discard_btn.count() > 0 and discard_btn.is_visible():
-                #     discard_btn.click()
-                #     human_delay(0.5, 1.0)
-
-                log_success("Clicked Dismiss (cross)")
-
-                # Step 2: Wait for Save button in confirmation modal
-                save_btn = page.locator('[data-control-name="save_application_btn"]').first
-
-                save_btn.wait_for(state="visible", timeout=5000)
+            else:
+                # Fallback: press Escape to close
+                page.keyboard.press("Escape")
                 human_delay(0.5, 1.0)
-                save_btn.click()
-
-                log_success("Application Saved as Draft!")
-                human_delay(2, 3)
 
         except Exception:
+            pass
+
+        try:
+            # Step 2: Handle the "Discard application?" confirmation dialog
+            # LinkedIn shows this after clicking X on an in-progress application.
+            # Check for a Discard button first, then fall back to Save as Draft.
+            discard_btn = page.locator(
+                'button[data-test-dialog-primary-btn], '
+                'button:has-text("Discard"), '
+                'button:has-text("Yes, discard")'
+            ).first
+
+            if discard_btn.count() > 0 and discard_btn.is_visible(timeout=3000):
+                discard_btn.click()
+                log_info("  Discarded draft application")
+                human_delay(0.5, 1.0)
+                return
+
+            # If no Discard button, try Save as Draft
+            save_btn = page.locator(
+                '[data-control-name="save_application_btn"], '
+                'button:has-text("Save")'
+            ).first
+
+            if save_btn.count() > 0 and save_btn.is_visible(timeout=3000):
+                save_btn.click()
+                log_info("  Saved application as draft")
+                human_delay(1, 2)
+
+        except Exception:
+            # No confirmation dialog appeared — modal is already gone
             pass
 
     def _dismiss_post_submit(self):

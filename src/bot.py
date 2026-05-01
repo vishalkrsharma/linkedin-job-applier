@@ -296,6 +296,8 @@ class LinkedInBot:
                                 listing.job_id, listing.title, listing.company,
                                 "apply_flow_failed"
                             )
+                            # Navigate back to search results so the next job card is clickable
+                            self._recover_page(page, search_url)
 
                     except Exception as e:
                         log_error(f"  Error applying: {e}")
@@ -304,6 +306,8 @@ class LinkedInBot:
                         )
                         if bot_config.get("screenshot_on_error", True):
                             self._take_error_screenshot(page, f"apply_error_{listing.job_id}")
+                        # Navigate back to search results so the next job card is clickable
+                        self._recover_page(page, search_url)
 
                 # Check for next page
                 if page_num < max_pages - 1:
@@ -356,6 +360,30 @@ class LinkedInBot:
             return False
         except Exception:
             return False
+
+    def _recover_page(self, page: Page, search_url: str):
+        """
+        Navigate back to the search URL so the job list is restored after a
+        failed or aborted apply. Without this the page can be stuck on a broken
+        state (modal still open, wrong URL) causing the next job card click to
+        trigger a full-page navigation instead of an in-place panel load.
+        """
+        try:
+            current_url = page.url
+            # Only reload if we've genuinely left the search results page
+            if "linkedin.com/jobs/search" not in current_url:
+                log_info("  Recovering: navigating back to search results...")
+                page.goto(search_url, wait_until="domcontentloaded")
+                human_delay(1.5, 2.5)
+            else:
+                # Still on the right page — just make sure no modal is lingering
+                try:
+                    page.keyboard.press("Escape")
+                    human_delay(0.3, 0.6)
+                except Exception:
+                    pass
+        except Exception as e:
+            log_warning(f"  Could not recover page state: {e}")
 
     def _take_error_screenshot(self, page: Page, name: str):
         """Save a screenshot on error for debugging."""
