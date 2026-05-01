@@ -92,6 +92,7 @@ class LinkedInBot:
 
             context = p.chromium.launch_persistent_context(
                 user_data_dir=PROFILE_DIR,
+                channel="chrome",  # Use native Google Chrome instead of bundled Chromium
                 headless=False if is_first_run else headless,  # Always visible on first run
                 args=[
                     "--disable-blink-features=AutomationControlled",
