@@ -5,7 +5,10 @@ Uses a dedicated browser profile with persistent LinkedIn session.
 
 import os
 import re
+import sys
 import time
+import signal
+import threading
 
 from playwright.sync_api import sync_playwright, Page
 from playwright.sync_api import Page, TimeoutError as PlaywrightTimeout
@@ -50,6 +53,7 @@ class LinkedInBot:
         self.applied_count = 0
         self.max_applications = config.get("bot", {}).get("max_applications", 25)
         self.blacklist = config.get("blacklist", {})
+        self._stop_requested = False  # Set to True on Ctrl+C to exit loop cleanly
 
     def run(self):
         """
@@ -58,10 +62,27 @@ class LinkedInBot:
         bot_config = self.config.get("bot", {})
         headless = bot_config.get("headless", False)
 
+        # Install a SIGINT (Ctrl+C) handler so we can exit cleanly without
+        # Playwright's sync wrapper hanging on teardown.
+        original_sigint = signal.getsignal(signal.SIGINT)
+
+        def _handle_sigint(signum, frame):
+            self._stop_requested = True
+            # Restore the original handler so a second Ctrl+C hard-kills immediately
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+            log_warning("\nCtrl+C received — shutting down cleanly...")
+            # Raise KeyboardInterrupt directly — this immediately unwinds through any
+            # blocking Playwright call (page.goto, wait_for, time.sleep, etc.) to the
+            # except KeyboardInterrupt handler in run(), which cleans up and exits.
+            raise KeyboardInterrupt
+
+        signal.signal(signal.SIGINT, _handle_sigint)
+
         # Use a dedicated profile directory for the bot
         ensure_dir(PROFILE_DIR)
         is_first_run = not os.path.exists(os.path.join(PROFILE_DIR, "Default"))
 
+        context = None
         with sync_playwright() as p:
             if is_first_run:
                 log_info("🆕 First run — you'll need to log in to LinkedIn once in the browser.")
@@ -119,11 +140,33 @@ class LinkedInBot:
                 if bot_config.get("screenshot_on_error", True):
                     self._take_error_screenshot(page, "unexpected_error")
             finally:
-                # Print summary
+                # Print summary before closing
                 self.tracker.print_summary()
 
+                # Close the browser in a background thread with a timeout so a
+                # hung browser process can't block the Python process from exiting.
                 log_info("Closing browser...")
-                context.close()
+                close_done = threading.Event()
+
+                def _close_browser():
+                    try:
+                        context.close()
+                    except Exception:
+                        pass
+                    finally:
+                        close_done.set()
+
+                t = threading.Thread(target=_close_browser, daemon=True)
+                t.start()
+                if not close_done.wait(timeout=5):
+                    log_warning("Browser did not close cleanly — forcing exit.")
+
+                # Restore the original SIGINT handler
+                signal.signal(signal.SIGINT, original_sigint)
+
+                # Hard exit so Playwright's internal threads can't block us
+                os._exit(0)
+
 
     def _ensure_linkedin_session(self, page: Page) -> bool:
         """
@@ -213,13 +256,13 @@ class LinkedInBot:
         search_combinations = list(itertools.product(keywords_list, locations))
 
         for current_keyword, current_location in search_combinations:
-            if self.applied_count >= self.max_applications:
+            if self._stop_requested or self.applied_count >= self.max_applications:
                 break
                 
             log_info(f"\n🌍 Starting search for '{current_keyword}' in '{current_location}'")
 
             for page_num in range(max_pages):
-                if self.applied_count >= self.max_applications:
+                if self._stop_requested or self.applied_count >= self.max_applications:
                     log_success(f"Reached max applications limit ({self.max_applications})")
                     break
 
@@ -240,7 +283,7 @@ class LinkedInBot:
 
                 # Process each job
                 for idx, listing in enumerate(listings):
-                    if self.applied_count >= self.max_applications:
+                    if self._stop_requested or self.applied_count >= self.max_applications:
                         break
 
                     log_step(
