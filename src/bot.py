@@ -391,7 +391,12 @@ class LinkedInBot:
                 )
                 return True
 
-        return should_apply(title=title_lower)
+        filters = self.config.get("search", {}).get("filters", {})
+        return should_apply(
+            title=title_lower,
+            role_keywords=filters.get("role_keywords"),
+            tech_keywords=filters.get("tech_keywords"),
+        )
 
     def _is_already_applied_on_page(self, page: Page) -> bool:
         """Check if LinkedIn shows 'Applied' status on the job details panel."""
