@@ -14,14 +14,19 @@ console = Console()
 
 import re
 
-def should_apply(title: str) -> bool:
+def should_apply(
+    title: str,
+    role_keywords: list[str] | None = None,
+    tech_keywords: list[str] | None = None,
+) -> bool:
     tokens = [t.lower() for t in split_role(title)]
     log_info(f" Title tokens : {tokens}")
-    ROLE_KEYWORDS = {"sde", "developer", "engineer"}
-    TECH_KEYWORDS = {"backend", "nodejs", "node", "golang", "go", "python", "fastapi", "javascript", "typescript", "aws"}
 
-    has_role = any(token in ROLE_KEYWORDS for token in tokens)
-    has_tech = any(token in TECH_KEYWORDS for token in tokens)
+    _role_kw = set(k.lower() for k in role_keywords) if role_keywords else {"sde", "developer", "engineer"}
+    _tech_kw = set(k.lower() for k in tech_keywords) if tech_keywords else {"backend", "nodejs", "node", "golang", "go", "python", "fastapi", "javascript", "typescript", "aws"}
+
+    has_role = any(token in _role_kw for token in tokens)
+    has_tech = any(token in _tech_kw for token in tokens)
 
     log_info(f" has role: {has_role} | has tech: {has_tech}")
     return not (has_role or has_tech)

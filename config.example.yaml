@@ -50,6 +50,25 @@ search:
     # Sort by: "most_relevant", "most_recent"
     sort_by: 'most_recent'
 
+    # Title-token filter — skip jobs whose title does NOT match
+    # at least one role keyword AND one tech keyword.
+    role_keywords:
+      - 'sde'
+      - 'developer'
+      - 'engineer'
+
+    tech_keywords:
+      - 'backend'
+      - 'nodejs'
+      - 'node'
+      - 'golang'
+      - 'go'
+      - 'python'
+      - 'fastapi'
+      - 'javascript'
+      - 'typescript'
+      - 'aws'
+
 # --- Resume ---
 resume_path: './Resume_Your_Name.pdf'
 
