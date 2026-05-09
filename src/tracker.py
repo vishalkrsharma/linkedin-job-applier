@@ -69,13 +69,14 @@ class Tracker:
         })
         self._save()
 
-    def record_failed(self, job_id: str, title: str, company: str, error: str):
+    def record_failed(self, job_id: str, title: str, company: str, error: str, url: str = ""):
         """Record a failed application attempt."""
         entry = {
             "job_id": job_id,
             "title": title,
             "company": company,
             "error": error,
+            "url": url,
             "failed_at": datetime.now().isoformat(),
         }
         self.data["failed"].append(entry)
@@ -121,6 +122,7 @@ class Tracker:
             recent_table = Table(show_header=True, header_style="bold magenta")
             recent_table.add_column("Job (Role - Company)", style="white")
             recent_table.add_column("Applied At", style="dim")
+            recent_table.add_column("Link", style="blue", no_wrap=True)
 
             for job in todays_applied:
                 # Clean up extracted texts to prevent multi-line rows
@@ -134,7 +136,8 @@ class Tracker:
                 if "T" in dt_str:
                     dt_str = dt_str[:16].replace("T", " ")
                     
-                recent_table.add_row(job_str, dt_str)
+                url = job.get("url", "")
+                recent_table.add_row(job_str, dt_str, url)
             console.print(recent_table)
 
         todays_failed = summary["todays_failed_jobs"]
@@ -143,6 +146,7 @@ class Tracker:
             error_table = Table(show_header=True, header_style="bold red")
             error_table.add_column("Job (Role - Company)", style="white")
             error_table.add_column("Error Reason", style="dim")
+            error_table.add_column("Link", style="blue", no_wrap=True)
             
             for job in todays_failed:
                 title = job.get("title", "Unknown").strip().split("\n")[0]
@@ -150,7 +154,8 @@ class Tracker:
                 job_str = f"{title} - {company}" if company else title
                 error_msg = job.get("error", "Unknown error").strip().split("\n")[0][:60]
                 
-                error_table.add_row(job_str, error_msg)
+                url = job.get("url", "")
+                error_table.add_row(job_str, error_msg, url)
             console.print(error_table)
 
         console.print("")

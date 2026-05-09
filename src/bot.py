@@ -338,7 +338,7 @@ class LinkedInBot:
                         else:
                             self.tracker.record_failed(
                                 listing.job_id, listing.title, listing.company,
-                                "apply_flow_failed"
+                                "apply_flow_failed", listing.url
                             )
                             # Navigate back to search results so the next job card is clickable
                             self._recover_page(page, search_url)
@@ -346,7 +346,7 @@ class LinkedInBot:
                     except Exception as e:
                         log_error(f"  Error applying: {e}")
                         self.tracker.record_failed(
-                            listing.job_id, listing.title, listing.company, str(e)
+                            listing.job_id, listing.title, listing.company, str(e), listing.url
                         )
                         if bot_config.get("screenshot_on_error", True):
                             self._take_error_screenshot(page, f"apply_error_{listing.job_id}")
