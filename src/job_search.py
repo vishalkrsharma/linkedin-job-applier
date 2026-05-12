@@ -108,10 +108,14 @@ def build_search_url(keywords: str, location: str, filters: dict, page_num: int 
         if values:
             params["f_WT"] = ",".join(values)
 
-    # Date posted
-    date_posted = filters.get("date_posted", "")
-    if date_posted and date_posted in DATE_POSTED_MAP and DATE_POSTED_MAP[date_posted]:
-        params["f_TPR"] = DATE_POSTED_MAP[date_posted]
+    # Date posted - check custom_time_posted first, then fall back to date_posted
+    custom_tpr = filters.get("custom_time_posted", "")
+    if custom_tpr:
+        params["f_TPR"] = custom_tpr
+    else:
+        date_posted = filters.get("date_posted", "")
+        if date_posted and date_posted in DATE_POSTED_MAP and DATE_POSTED_MAP[date_posted]:
+            params["f_TPR"] = DATE_POSTED_MAP[date_posted]
 
     # Sort by
     sort_by = filters.get("sort_by", "most_recent")

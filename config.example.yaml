@@ -44,6 +44,11 @@ search:
     # Date posted: "any_time", "past_month", "past_week", "past_24_hours"
     date_posted: 'past_week'
 
+    # Custom time posted filter (optional, overrides date_posted above)
+    # Format: seconds with 'r' prefix (e.g., "r86400" for 24 hours, "r604800" for 1 week)
+    # Common values: r86400 (24h), r604800 (1 week), r1209600 (2 weeks), r2592000 (1 month)
+    custom_time_posted: ''
+
     # Only show Easy Apply jobs
     easy_apply_only: true
 
